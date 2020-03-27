@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import keyboard
 import numPad
 
@@ -13,13 +14,29 @@ class MainWindow(tk.Frame):
 
     def init_window(self):
         self.master.title("Main Window")
+        self.master.geometry("600x600")
         self.newVal = ""
+        self.memberDict={} #dictionaries can be sorted
+
+        stdHeight = 40
+        stdWidth = 100
+
+        container = ttk.Frame(root)
+        canvas = tk.Canvas(container)
+        scrollbar = ttk.Scrollbar(container, orient="vertical", command = canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        scrollable_frame.bind(
+        "<Configure>",
+         lambda e: canvas.configure(
+         scrollregion=canvas.bbox("all")))
+
+        canvas.create_window((0,0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
 
         def addName():
             dialog = keyboard.KeyboardGUI(self, app)
             root.wait_window(dialog)
-            field='name'
-            updateLabel(self, self.newVal, field)
+            updateList(self, self.newVal)
             self.newVal = ""
 
         def addAmount():
@@ -29,34 +46,45 @@ class MainWindow(tk.Frame):
             updateLabel(self, self.newVal,field)
             self.newVal=""
 
-        def updateLabel(self, value, field):
+        '''def updateLabel(self, value, field):
             if field == 'name':
                 name.configure(text=value)
+                self.memberDict = sorted(self.memberDict)
+                print(self.memberDict)
             elif field == 'amount':
-                balance.configure(text=value)
+                balance.configure(text=value)'''
 
-        stdHeight = 40
-        stdWidth = 100
 
-        nameLabel = tk.Label(root, text="Name:")
-        nameLabel.pack()
-        nameLabel.place(height = stdHeight, width= stdWidth, x=0, y=0)
-        name = tk.Label(root, text="")
-        name.pack()
-        name.place(height=stdHeight, width=stdWidth, x=100, y=0)
-        nameBtn = tk.Button(root, text="Enter name", command=addName)
-        nameBtn.pack()
-        nameBtn.place(height=stdHeight, width=stdWidth, x=200, y=0)
+        def updateList(self, newName):
+            self.memberDict[str(newName)]=0
+            orderedList=sorted(self.memberDict)
+            yOffset=0
+            canvas.delete("all")
+            canvas.create_window((0,0), window=scrollable_frame, anchor="nw")
+            for name in orderedList:
+                nameLabel=tk.Label(root, text="")
+                nameLabel.configure(text="%s"%name)
+                #nameLabel.place(height=stdHeight, width=stdWidth, x=0, y=yOffset)
+                nameLabel_window = canvas.create_window((0, yOffset), anchor="nw", window=nameLabel)
+                balanceLabel = tk.Label(root, text="")
+                balanceLabel.configure(text="%s"%str(self.memberDict[name]))
+                #balanceLabel.place(height=stdHeight, width=stdWidth, x=stdWidth, y=yOffset)
+                balance_window = canvas.create_window((stdWidth, yOffset), anchor="nw", window=balanceLabel)
+                if yOffset !=0:
+                    lineY = yOffset - 10
+                    canvas.create_line(0, lineY, 3*stdWidth, lineY, fill="blue")
+                yOffset+=stdHeight
+            canvas.configure(yscrollcommand=scrollbar.set)
 
-        balanceLabel = tk.Label(root, text="Balance:")
-        balanceLabel.pack()
-        balanceLabel.place(height=stdHeight, width=stdWidth, x=0, y=40)
-        balance = tk.Label(root, text="")
-        balance.pack()
-        balance.place(height=stdHeight, width=stdWidth, x=100, y=40)
-        balanceBtn = tk.Button(root, text="Enter Balance", command=addAmount)
-        balanceBtn.pack()
-        balanceBtn.place(height=stdHeight, width=stdWidth, x=200, y=40)
+        canvas.pack(side="left",fill="both", expand="True")
+        scrollbar.pack(side="right", fill="y")
+        container.pack()
+
+        nameBtn = tk.Button(root, text="Add Name", command=addName)
+        nameBtn.place(height=stdHeight, width=stdWidth, anchor="sw", x=200, rely=1.0)
+
+        paymentBtn = tk.Button(root, text="Make Payment", command=addAmount)
+        paymentBtn.place(height=stdHeight, width=stdWidth, anchor = "sw", x=320, rely=1.0)
 
 
 if __name__ == '__main__':

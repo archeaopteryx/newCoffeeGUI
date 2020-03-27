@@ -12,7 +12,7 @@ class KeyboardGUI(tk.Toplevel):
     def init_window(self):
         self.title("Name Entry")
         self.geometry("950x560")
-        fontSize = 30
+        fontSize = 28
         fontName = 'TkDefaultFont'
 
         self.textStr=""
@@ -35,9 +35,9 @@ class KeyboardGUI(tk.Toplevel):
 
         stdHeight = 60
         stdWidth = 60
-        displayWidth= 600
+        displayWidth= 700
         display.pack()
-        display.place(height=stdHeight, width=stdHeight, x=0, y=0)
+        display.place(height=stdHeight, width=displayWidth, x=0, y=0)
 
         def helpBox():
             helpMsg = "First click the button with the desired accent, then click the letter you want to add it to. For example, \N{DIAERESIS}a produces \N{LATIN SMALL LETTER A WITH DIAERESIS}"
@@ -50,7 +50,6 @@ class KeyboardGUI(tk.Toplevel):
             if len(self.textStr) == 1:
                 makeKeyboard(keyboard, False)
             self.accent = ""
-            print(toDisplay)
 
         def backspace():
             self.textStr = self.textStr[:-1]
@@ -62,6 +61,7 @@ class KeyboardGUI(tk.Toplevel):
 
         def submit():
             self.app.newVal = self.textStr
+            #self.app.memberDict[self.textStr]=0
             self.destroy()
 
         def addAccent(accentCode):
@@ -90,7 +90,6 @@ class KeyboardGUI(tk.Toplevel):
                         glyph = str(keyboard[r][c][case])
                         button = tk.Button(self, text="%s"%glyph, font=(fontName, fontSize))
                         button.configure(command=lambda glpyhVar = glyph: nextChar(glpyhVar))
-                        button.pack()
                         button.place(height=stdHeight, width=stdWidth, x=xOffset,y=yOffset)
                         xOffset+=stdWidth
                     else:
@@ -101,7 +100,6 @@ class KeyboardGUI(tk.Toplevel):
                         elif glyph == 'del':
                             button.configure(command= backspace)
                         xOffset+=keyboard[r][c][offsetIndex]
-                        button.pack()
                         button.place(height=stdHeight, width=keyboard[r][c][widthIndex], x=xOffset, y=yOffset)
                         xOffset+=keyboard[r][c][widthIndex]
                 yOffset+=stdHeight
@@ -114,13 +112,11 @@ class KeyboardGUI(tk.Toplevel):
                 glyph = str(keyboard[-1][c][case])
                 button=tk.Button(self, text='%s'%glyph, font=(fontName, fontSize))
                 button.configure(command=lambda glyphVar = glyph: nextChar(glyphVar))
-                button.pack()
                 button.place(height=stdHeight, width=stdWidth, x=xOffset, y=yOffset)
                 xOffset+=stdWidth
             xOffset=0
             yOffset+= 2*stdHeight
             submitBtn = tk.Button(self, text="SUMBIT", font=(fontName, fontSize), command=submit)
-            submitBtn.pack()
             submitBtn.place(height=stdHeight, width=240, x=0, y = yOffset)
 
         def makeAccentPad(accentPad):
@@ -133,13 +129,11 @@ class KeyboardGUI(tk.Toplevel):
                     accentAdd = accent[1]
                     button = tk.Button(self, text="%s"%accentGlyph,font=(fontName, fontSize))
                     button.configure(command=lambda accentVar = accentAdd: addAccent(accentVar))
-                    button.pack()
                     button.place(height=stdHeight, width=stdWidth, x=xOffset, y=yOffset)
                     xOffset+= stdWidth
 
             helpBtn = tk.Button(self, text="help", font=(fontName, 16))
             helpBtn.configure(command=helpBox)
-            helpBtn.pack()
             helpBtn.place(height=stdHeight, width=stdWidth, x=xOffset, y=yOffset)
 
 

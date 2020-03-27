@@ -26,7 +26,6 @@ class NumPad(tk.Toplevel):
         display = tk.Label(self, text="", font=("TkDefaultFont", fontSize))
         rowHeight=0.16
         colWidth= 0.33
-        display.pack()
         display.place(relheight=rowHeight, relwidth=1, x=0, y=0)
         #display.grid(row=0, column=0, columnspan=3)
 
