@@ -60,7 +60,7 @@ class KeyboardGUI(tk.Toplevel):
             display.configure(text="%s" %self.textStr)
 
         def submit():
-            self.app.newVal = self.textStr
+            self.app.newUser = self.textStr
             #self.app.memberDict[self.textStr]=0
             self.destroy()
 

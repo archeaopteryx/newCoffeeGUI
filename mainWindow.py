@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from PIL import ImageTk, Image
 import keyboard
 import numPad
 
@@ -14,9 +15,12 @@ class MainWindow(tk.Frame):
 
     def init_window(self):
         self.master.title("Main Window")
-        self.master.geometry("600x600")
-        self.newVal = ""
-        self.memberDict={} #dictionaries can be sorted
+        self.master.geometry("800x600")
+        self.newVal = None
+        self.newUser = ""
+        self.selectedUser=""
+        self.memberDict={}
+        self.milkDict={}
 
         stdHeight = 40
         stdWidth = 100
@@ -33,48 +37,80 @@ class MainWindow(tk.Frame):
         canvas.create_window((0,0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
 
+        animationFrames = [tk.PhotoImage(file='coffeeAnimation2.gif', format='gif -index %i' %(i)) for i in range(4)]
+        #img = tk.PhotoImage(file='coffeeImage.png')
+        #animationLabel = tk.Label(root, image=img)
+        #animationLabel.image = img
+        animationLabel = tk.Label(root)
+        animationLabel.place(height=2.5*stdWidth, width=2*stdWidth, anchor='ne', relx=1.0, rely=0)
+
+
         def addName():
             dialog = keyboard.KeyboardGUI(self, app)
             root.wait_window(dialog)
-            updateList(self, self.newVal)
-            self.newVal = ""
+            if len(self.newUser) > 0:
+                updateList(self, self.newUser)
+            self.newUser = ""
 
         def addAmount():
             dialog = numPad.NumPad(self, app)
             root.wait_window(dialog)
-            field='amount'
-            updateLabel(self, self.newVal,field)
-            self.newVal=""
+            if self.newVal != None:
+                updateLabel(self, self.newVal, self.selectedUser)
+            self.newVal=None
+            self.selectedUser=""
 
-        '''def updateLabel(self, value, field):
-            if field == 'name':
-                name.configure(text=value)
-                self.memberDict = sorted(self.memberDict)
-                print(self.memberDict)
-            elif field == 'amount':
-                balance.configure(text=value)'''
+        def buyCoffee(name):
+            balance = self.memberDict.get(name)
+            milk = self.milkDict.get(name)
+            if balance != None:
+                balance=balance-20-5*milk
+                self.memberDict[name]=balance
+                getattr(self, 'balance_%s'%name).configure(text='{:.2f}'.format(balance/100))
 
+        def milkUpdate(name):
+            milkVal = self.milkDict[name]
+            newVal = (milkVal+1)%2
+            self.milkDict[name]=newVal
 
         def updateList(self, newName):
             self.memberDict[str(newName)]=0
+            self.milkDict[str(newName)] = 0
             orderedList=sorted(self.memberDict)
             yOffset=0
+            button_x = 2*stdWidth
             canvas.delete("all")
             canvas.create_window((0,0), window=scrollable_frame, anchor="nw")
             for name in orderedList:
                 nameLabel=tk.Label(root, text="")
                 nameLabel.configure(text="%s"%name)
-                #nameLabel.place(height=stdHeight, width=stdWidth, x=0, y=yOffset)
                 nameLabel_window = canvas.create_window((0, yOffset), anchor="nw", window=nameLabel)
                 balanceLabel = tk.Label(root, text="")
-                balanceLabel.configure(text="%s"%str(self.memberDict[name]))
-                #balanceLabel.place(height=stdHeight, width=stdWidth, x=stdWidth, y=yOffset)
+                balanceLabel.configure(text='{:.2f}'.format(self.memberDict[name]/100))
+                setattr(self, 'balance_%s'%name, balanceLabel)
                 balance_window = canvas.create_window((stdWidth, yOffset), anchor="nw", window=balanceLabel)
+                milkCheck = tk.Checkbutton(root, text="with milk", command=lambda milkName = name: milkUpdate(milkName))
+                milkCheck_window = canvas.create_window((button_x, yOffset), anchor="nw", window=milkCheck)
+                buy_btn = tk.Button(root, text="Buy a coffee", command = lambda nameVal = name: buyCoffee(nameVal))
+                buy_btn_window = canvas.create_window((button_x, yOffset+stdHeight), anchor="nw", window=buy_btn)
                 if yOffset !=0:
                     lineY = yOffset - 10
                     canvas.create_line(0, lineY, 3*stdWidth, lineY, fill="blue")
-                yOffset+=stdHeight
+                yOffset+=2*stdHeight
             canvas.configure(yscrollcommand=scrollbar.set)
+
+        def updateLabel(self, amount, name):
+            balance = self.memberDict.get(name)
+            if balance != None:
+                balance += amount
+                self.memberDict[name] = balance
+                getattr(self, 'balance_%s'%name).configure(text='{:.2f}'.format(balance/100))
+
+        def animate(index):
+            index = index%4
+            frame = animationFrames[index]
+            animationLabel.configure(image=frame)
+            root.after(200, animate, index+1)
 
         canvas.pack(side="left",fill="both", expand="True")
         scrollbar.pack(side="right", fill="y")
@@ -85,6 +121,8 @@ class MainWindow(tk.Frame):
 
         paymentBtn = tk.Button(root, text="Make Payment", command=addAmount)
         paymentBtn.place(height=stdHeight, width=stdWidth, anchor = "sw", x=320, rely=1.0)
+
+        root.after(200, animate, 0)
 
 
 if __name__ == '__main__':
