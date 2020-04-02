@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from PIL import ImageTk, Image
+import fileManager
+import delUserWindow
 import keyboard
 import numPad
 
@@ -38,12 +41,8 @@ class MainWindow(tk.Frame):
         canvas.configure(yscrollcommand=scrollbar.set)
 
         animationFrames = [tk.PhotoImage(file='coffeeAnimation2.gif', format='gif -index %i' %(i)) for i in range(4)]
-        #img = tk.PhotoImage(file='coffeeImage.png')
-        #animationLabel = tk.Label(root, image=img)
-        #animationLabel.image = img
         animationLabel = tk.Label(root)
         animationLabel.place(height=2.5*stdWidth, width=2*stdWidth, anchor='ne', relx=1.0, rely=0)
-
 
         def addName():
             dialog = keyboard.KeyboardGUI(self, app)
@@ -68,14 +67,15 @@ class MainWindow(tk.Frame):
                 self.memberDict[name]=balance
                 getattr(self, 'balance_%s'%name).configure(text='{:.2f}'.format(balance/100))
 
-        def milkUpdate(name):
+        def updateMilk(name):
             milkVal = self.milkDict[name]
             newVal = (milkVal+1)%2
             self.milkDict[name]=newVal
 
         def updateList(self, newName):
-            self.memberDict[str(newName)]=0
-            self.milkDict[str(newName)] = 0
+            if newName != None:
+                self.memberDict[str(newName)]=0
+                self.milkDict[str(newName)] = 0
             orderedList=sorted(self.memberDict)
             yOffset=0
             button_x = 2*stdWidth
@@ -89,7 +89,9 @@ class MainWindow(tk.Frame):
                 balanceLabel.configure(text='{:.2f}'.format(self.memberDict[name]/100))
                 setattr(self, 'balance_%s'%name, balanceLabel)
                 balance_window = canvas.create_window((stdWidth, yOffset), anchor="nw", window=balanceLabel)
-                milkCheck = tk.Checkbutton(root, text="with milk", command=lambda milkName = name: milkUpdate(milkName))
+                milkCheck = tk.Checkbutton(root, text="with milk", command=lambda milkName = name: updateMilk(milkName))
+                if self.milkDict[name] == 1:
+                    milkCheck.toggle()
                 milkCheck_window = canvas.create_window((button_x, yOffset), anchor="nw", window=milkCheck)
                 buy_btn = tk.Button(root, text="Buy a coffee", command = lambda nameVal = name: buyCoffee(nameVal))
                 buy_btn_window = canvas.create_window((button_x, yOffset+stdHeight), anchor="nw", window=buy_btn)
@@ -106,6 +108,18 @@ class MainWindow(tk.Frame):
                 self.memberDict[name] = balance
                 getattr(self, 'balance_%s'%name).configure(text='{:.2f}'.format(balance/100))
 
+        def removeUser():
+            if len(self.memberDict) == 0:
+                msg = "No users to remove!"
+                tk.messagebox.showinfo("Error!", msg)
+            else:
+                dialog = delUserWindow.DelUserWindow(self, app)
+                root.wait_window(dialog)
+                if len(self.selectedUser) != 0:
+                    del self.memberDict[self.selectedUser]
+                    updateList(self, None)
+                    self.selectedUser=""
+
         def animate(index):
             index = index%4
             frame = animationFrames[index]
@@ -116,11 +130,21 @@ class MainWindow(tk.Frame):
         scrollbar.pack(side="right", fill="y")
         container.pack()
 
-        nameBtn = tk.Button(root, text="Add Name", command=addName)
-        nameBtn.place(height=stdHeight, width=stdWidth, anchor="sw", x=200, rely=1.0)
+        nameBtn = tk.Button(root, text="Add User", command=addName)
+        nameBtn.place(height=stdHeight, width=stdWidth, anchor="sw", x=0, rely=1.0)
+
+        removeBtn = tk.Button(root, text="Remove User", command=removeUser)
+        removeBtn.place(height=stdHeight, width=stdWidth, anchor="sw", x=120, rely=1.0)
 
         paymentBtn = tk.Button(root, text="Make Payment", command=addAmount)
-        paymentBtn.place(height=stdHeight, width=stdWidth, anchor = "sw", x=320, rely=1.0)
+        paymentBtn.place(height=stdHeight, width=stdWidth, anchor = "se", relx=1.0, rely=1.0)
+
+        try:
+            self.memberDict, self.milkDict = fileManager.openList()
+            updateList(self, None)
+        except IOError as e:
+            self.memberDict = {}
+            self.milkDict= {}
 
         root.after(200, animate, 0)
 

@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import PhotoImage
+from PIL import Image, ImageTk
 
 
 class KeyboardGUI(tk.Toplevel):
@@ -31,17 +32,17 @@ class KeyboardGUI(tk.Toplevel):
 
         keyboard = [row1, row2, row3, row4]
         accentPad = [accentRow1, accentRow2, accentRow3]
-        display = tk.Label(self, text="", font=(fontName,fontSize))
 
         stdHeight = 60
         stdWidth = 60
         displayWidth= 700
-        display.pack()
+
+        display = tk.Label(self, text="", font=(fontName,fontSize))
         display.place(height=stdHeight, width=displayWidth, x=0, y=0)
 
         def helpBox():
             helpMsg = "First click the button with the desired accent, then click the letter you want to add it to. For example, \N{DIAERESIS}a produces \N{LATIN SMALL LETTER A WITH DIAERESIS}"
-            messagebox.showinfo('Help', helpMsg)
+            self.messageBox.configure(text=helpMsg, foreground="blue")
 
         def nextChar(character):
             toDisplay = str(character)+self.accent
@@ -60,9 +61,15 @@ class KeyboardGUI(tk.Toplevel):
             display.configure(text="%s" %self.textStr)
 
         def submit():
-            self.app.newUser = self.textStr
-            #self.app.memberDict[self.textStr]=0
-            self.destroy()
+            if self.textStr == "None":
+                errorMsg = "Very funny. Please use a name that isn't likely to break the program"
+                self.messageBox.configure(text=errorMsg, foreground="red")
+            elif self.app.memberDict.get(self.textStr) == None:
+                self.app.newUser = self.textStr
+                self.destroy()
+            else:
+                errorMsg = "Error! Name already exists! Please change the name and hit 'submit' again."
+                self.messageBox.configure(text=errorMsg, foreground="red")
 
         def addAccent(accentCode):
             self.accent += accentCode
@@ -96,7 +103,7 @@ class KeyboardGUI(tk.Toplevel):
                         glyph = str(keyboard[r][c][nameIndex])
                         button = tk.Button(self, text='%s'%glyph, font=(fontName, fontSize))
                         if glyph =='shift':
-                            button.configure(command= lambda shiftVar = shift: shift(shiftVar))
+                            button.configure(command= lambda shiftVar = shift: shiftKey(shiftVar))
                         elif glyph == 'del':
                             button.configure(command= backspace)
                         xOffset+=keyboard[r][c][offsetIndex]
@@ -108,7 +115,7 @@ class KeyboardGUI(tk.Toplevel):
             spaceBtn.pack()
             spaceBtn.place(height=stdHeight, width=300, x=xOffset, y=yOffset)
             xOffset+=330
-            for c in range(len(keyboard[-1])):
+            for c in range(len(keyboard[-1])): #special layout for last row
                 glyph = str(keyboard[-1][c][case])
                 button=tk.Button(self, text='%s'%glyph, font=(fontName, fontSize))
                 button.configure(command=lambda glyphVar = glyph: nextChar(glyphVar))
@@ -118,6 +125,12 @@ class KeyboardGUI(tk.Toplevel):
             yOffset+= 2*stdHeight
             submitBtn = tk.Button(self, text="SUMBIT", font=(fontName, fontSize), command=submit)
             submitBtn.place(height=stdHeight, width=240, x=0, y = yOffset)
+            messageBoxHeight = 2*stdHeight
+            messageBoxWidth = 600
+            messageBoxAspect = int(messageBoxWidth/messageBoxHeight*100)
+            msgBoxDefault = "Welcome to the coffee list!\nPlease enter the name of the new user and hit The 'submit' button."
+            self.messageBox = tk.Message(self, text=msgBoxDefault, aspect=messageBoxAspect, font=(fontName, 20))
+            self.messageBox.place(height=messageBoxHeight, width=messageBoxWidth, x=300, y=yOffset)
 
         def makeAccentPad(accentPad):
             yOffset = 0
@@ -132,7 +145,9 @@ class KeyboardGUI(tk.Toplevel):
                     button.place(height=stdHeight, width=stdWidth, x=xOffset, y=yOffset)
                     xOffset+= stdWidth
 
-            helpBtn = tk.Button(self, text="help", font=(fontName, 16))
+            helpIcon = ImageTk.PhotoImage(Image.open('helpIcon.png').resize(size=(stdWidth-6, stdHeight-6)))
+            helpBtn = tk.Button(self, image=helpIcon, font=(fontName, 16))
+            helpBtn.image=helpIcon
             helpBtn.configure(command=helpBox)
             helpBtn.place(height=stdHeight, width=stdWidth, x=xOffset, y=yOffset)
 
