@@ -47,18 +47,18 @@ class KeyboardGUI(tk.Toplevel):
         def nextChar(character):
             toDisplay = str(character)+self.accent
             self.textStr += character
-            display.configure(text="%s" %self.textStr)
+            display.configure(text="{0}".format(self.textStr))
             if len(self.textStr) == 1:
                 makeKeyboard(keyboard, False)
             self.accent = ""
 
         def backspace():
             self.textStr = self.textStr[:-1]
-            display.configure(text="%s" %self.textStr)
+            display.configure(text="{0}".format(self.textStr))
 
         def space():
             self.textStr += ' '
-            display.configure(text="%s" %self.textStr)
+            display.configure(text="{0}".format(self.textStr))
 
         def submit():
             if self.textStr == "None":
@@ -95,13 +95,13 @@ class KeyboardGUI(tk.Toplevel):
                 for c in range(len(keyboard[r])):
                     if len(keyboard[r][c])==2:
                         glyph = str(keyboard[r][c][case])
-                        button = tk.Button(self, text="%s"%glyph, font=(fontName, fontSize))
+                        button = tk.Button(self, text="{0}".format(glyph), font=(fontName, fontSize))
                         button.configure(command=lambda glpyhVar = glyph: nextChar(glpyhVar))
                         button.place(height=stdHeight, width=stdWidth, x=xOffset,y=yOffset)
                         xOffset+=stdWidth
                     else:
                         glyph = str(keyboard[r][c][nameIndex])
-                        button = tk.Button(self, text='%s'%glyph, font=(fontName, fontSize))
+                        button = tk.Button(self, text='{0}'.format(glyph), font=(fontName, fontSize))
                         if glyph =='shift':
                             button.configure(command= lambda shiftVar = shift: shiftKey(shiftVar))
                         elif glyph == 'del':
@@ -117,7 +117,7 @@ class KeyboardGUI(tk.Toplevel):
             xOffset+=330
             for c in range(len(keyboard[-1])): #special layout for last row
                 glyph = str(keyboard[-1][c][case])
-                button=tk.Button(self, text='%s'%glyph, font=(fontName, fontSize))
+                button=tk.Button(self, text='{0}'.format(glyph), font=(fontName, fontSize))
                 button.configure(command=lambda glyphVar = glyph: nextChar(glyphVar))
                 button.place(height=stdHeight, width=stdWidth, x=xOffset, y=yOffset)
                 xOffset+=stdWidth
@@ -140,7 +140,7 @@ class KeyboardGUI(tk.Toplevel):
                 for accent in row:
                     accentGlyph = str(accent[0])
                     accentAdd = accent[1]
-                    button = tk.Button(self, text="%s"%accentGlyph,font=(fontName, fontSize))
+                    button = tk.Button(self, text="{0}".format(accentGlyph),font=(fontName, fontSize))
                     button.configure(command=lambda accentVar = accentAdd: addAccent(accentVar))
                     button.place(height=stdHeight, width=stdWidth, x=xOffset, y=yOffset)
                     xOffset+= stdWidth

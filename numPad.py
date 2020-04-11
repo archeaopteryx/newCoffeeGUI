@@ -10,7 +10,7 @@ class NumPad(tk.Toplevel):
 
     def init_window(self):
         self.title("NumPad")
-        self.geometry("600x600")
+        self.geometry("800x600")
         fontSize = 30
         self.textStr = ""
         self.user = ""
@@ -30,19 +30,18 @@ class NumPad(tk.Toplevel):
         rowHeight=0.16
         colWidth= 0.33
         display.place(relheight=rowHeight, relwidth=1, x=0, y=0)
-        #display.grid(row=0, column=0, columnspan=3)
 
         def nextGlyph(glyph):
             self.textStr += glyph
-            display.configure(text="%s" %self.textStr)
+            display.configure(text="{0}".format(self.textStr))
 
         def clear():
             self.textStr = ""
-            display.configure(text="%s" %self.textStr)
+            display.configure(text="{0}".format(self.textStr))
 
         def delete():
             self.textStr = self.textStr[:-1]
-            display.configure(text="%s" %self.textStr)
+            display.configure(text="{0}".format(self.textStr))
 
         def submit():
             if len(self.textStr)>0:
@@ -58,7 +57,7 @@ class NumPad(tk.Toplevel):
             for r in range(len(numPad)):
                 for c in range(len(numPad[r])):
                     glyph = numPad[r][c]
-                    button = tk.Button(numPadFrame, text="%s"%glyph, font=("TkDefaultFont", fontSize))
+                    button = tk.Button(numPadFrame, text="{0}".format(glyph), font=("TkDefaultFont", fontSize))
                     if glyph=='del':
                         button.configure(command=delete)
                     elif glyph=='C':
@@ -78,17 +77,24 @@ class NumPad(tk.Toplevel):
             self.user = self.dropDownVar.get()
 
         def makeUserPane():
+            dropDownLabel = tk.Label(userSelectFrame, text="Select user:")
+            dropDownLabel.configure(font=("TkDefaultFont", 20))
+            dropDownLabel.place(height=40, relwidth=0.95, x=5, y=10)
+
             self.dropDownVar = tk.StringVar(self)
             memberList = sorted(self.app.memberDict)
             memberList.append('None')
             self.dropDownVar.set('None')
 
             dropDown = tk.OptionMenu(userSelectFrame, self.dropDownVar, *memberList)
+            dropDown.config(font=("TkDefaultFont", 20))
+            options = self.nametowidget(dropDown.menuname)
+            options.config(font=("TkDefaultFont",20))
             self.dropDownVar.trace('w', changeDropdown)
-            dropDown.place(relheight=0.2, relwidth=1.0, x=30, y=50)
+            dropDown.place(height=80, relwidth=0.95, x=5, y=60)
 
 
         makeNumPad(numPad)
         makeUserPane()
-        userSelectFrame.place(relheight=1.0, relwidth=0.2, anchor="nw", x=0, y=0)
-        numPadFrame.place(relheight=1.0, relwidth=0.8, anchor="nw", x=130, y=0)
+        userSelectFrame.place(relheight=1.0, relwidth=0.4, anchor="nw", x=0, y=0)
+        numPadFrame.place(relheight=1.0, relwidth=0.6, anchor="ne", x=800, y=0)
