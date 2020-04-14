@@ -110,8 +110,12 @@ class KeyboardGUI(tk.Toplevel):
                         button.place(height=stdHeight, width=keyboard[r][c][widthIndex], x=xOffset, y=yOffset)
                         xOffset+=keyboard[r][c][widthIndex]
                 yOffset+=stdHeight
-            xOffset=180
+            xOffset=120
+            periodBtn = tk.Button(self, text = ".", font=(fontName, fontSize))
+            periodBtn.configure(command=lambda glyphVar = ".": nextChar(glyphVar))
+            periodBtn.place(height=stdHeight, width=stdWidth, x=xOffset, y=yOffset)
             spaceBtn = tk.Button(self, text="space", font=(fontName, fontSize), command=space)
+            xOffset+=stdWidth
             spaceBtn.pack()
             spaceBtn.place(height=stdHeight, width=300, x=xOffset, y=yOffset)
             xOffset+=330
