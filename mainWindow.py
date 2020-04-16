@@ -77,6 +77,15 @@ class MainWindow(tk.Frame):
             self.selectedUser=""
             fileManager.backup(self.memberDict, self.milkDict)
 
+        def drawPlot():
+            plotterObject.update_values()
+            coffees = plotterObject.coffees
+            hours = plotterObject.hours
+            plotFigure = plotter.makePlot(coffees, hours)
+            barChartCanvas = FigureCanvasTkAgg(plotFigure, master=root)
+            barChartCanvas.draw()
+            barChartCanvas.get_tk_widget().place(height=500, width=500, anchor='se', relx=1.0, rely=0.8)
+
         def buyCoffee(name):
             balance = self.memberDict.get(name)
             milk = self.milkDict.get(name)
@@ -87,18 +96,36 @@ class MainWindow(tk.Frame):
             self.backupCounter = (self.backupCounter +1)%15
             if self.backupCounter == 0:
                 fileManager.backup(self.memberDict, self.milkDict)
-            plotterObject.update_values()
-            coffees = plotterObject.coffees
-            hours = plotterObject.hours
-            plotFigure = plotter.makePlot(coffees, hours)
-            barChartCanvas = FigureCanvasTkAgg(plotFigure, master=root)
-            barChartCanvas.draw()
-            barChartCanvas.get_tk_widget().place(height=500, width=500, anchor='se', relx=1.0, rely=0.8)
+            drawPlot()
 
         def updateMilk(name):
             milkVal = self.milkDict[name]
             newVal = (milkVal+1)%2
             self.milkDict[name]=newVal
+
+        def makeNameLabel(name):
+            nameLabel=tk.Label(root, text="")
+            nameLabel.configure(text="{0}".format(name), font=(stdFont, userFont))
+            return nameLabel
+
+        def makeBalanceLabel(name):
+            balanceLabel = tk.Label(root, text="")
+            balanceLabel.configure(text='{:.2f}'.format(self.memberDict[name]/100))
+            balanceLabel.configure(font=(stdFont, userFont))
+            setattr(self, 'balance_{0}'.format(name), balanceLabel)
+            return balanceLabel
+
+        def makeMilkCheck(name):
+            milkCheck = tk.Checkbutton(root, text="with milk", command=lambda milkName = name: updateMilk(milkName))
+            if self.milkDict[name] == 1:
+                milkCheck.toggle()
+            milkCheck.configure(font=(stdFont, btnFont))
+            return milkCheck
+
+        def makeBuyBtn(name):
+            buy_btn = tk.Button(root, text="Buy a coffee", command = lambda nameVal = name: buyCoffee(nameVal))
+            buy_btn.configure(font=(stdFont, btnFont))
+            return buy_btn
 
         def updateList(self, newName):
             if newName != None:
@@ -110,21 +137,13 @@ class MainWindow(tk.Frame):
             canvas.delete("all")
             canvas.create_window((0,0), window=scrollable_frame, anchor="nw")
             for name in orderedList:
-                nameLabel=tk.Label(root, text="")
-                nameLabel.configure(text="{0}".format(name), font=(stdFont, userFont))
+                nameLabel = makeNameLabel(name)
                 nameLabel_window = canvas.create_window((0, yOffset), anchor="nw", window=nameLabel)
-                balanceLabel = tk.Label(root, text="")
-                balanceLabel.configure(text='{:.2f}'.format(self.memberDict[name]/100))
-                balanceLabel.configure(font=(stdFont, userFont))
-                setattr(self, 'balance_{0}'.format(name), balanceLabel)
+                balanceLabel = makeBalanceLabel(name)
                 balance_window = canvas.create_window((2*stdWidth, yOffset), anchor="nw", window=balanceLabel)
-                milkCheck = tk.Checkbutton(root, text="with milk", command=lambda milkName = name: updateMilk(milkName))
-                if self.milkDict[name] == 1:
-                    milkCheck.toggle()
-                milkCheck.configure(font=(stdFont, btnFont))
+                milkCheck = makeMilkCheck(name)
                 milkCheck_window = canvas.create_window((button_x, yOffset), anchor="nw", window=milkCheck)
-                buy_btn = tk.Button(root, text="Buy a coffee", command = lambda nameVal = name: buyCoffee(nameVal))
-                buy_btn.configure(font=(stdFont, btnFont))
+                buy_btn = makeBuyBtn(name)
                 buy_btn_window = canvas.create_window((button_x, yOffset+stdHeight), anchor="nw", window=buy_btn)
                 if yOffset !=0:
                     lineY = yOffset - 10
