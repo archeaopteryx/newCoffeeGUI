@@ -96,6 +96,7 @@ class MainWindow(tk.Frame):
             root.wait_window(dialog)
             if len(self.newUser) > 0:
                 isAdmin = (passHash(self.newUser) == admin)
+            self.newUser = ""
             print(isAdmin)
 
         def buyCoffee(name):

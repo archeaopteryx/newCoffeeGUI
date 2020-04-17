@@ -81,16 +81,17 @@ class KeyboardGUI(tk.Toplevel):
             if self.textStr == "None":
                 errorMsg = "Very funny. Please use a name that isn't likely to break the program"
                 self.messageBox.configure(text=errorMsg, foreground="red")
-            if self.type == "user":
-                if self.app.memberDict.get(self.textStr) == None:
+            else:
+                if self.type == "user":
+                    if self.app.memberDict.get(self.textStr) == None:
+                        self.app.newUser = self.textStr
+                        self.destroy()
+                    else:
+                        errorMsg = "Error! Name already exists! Please change the name and hit 'submit' again."
+                        self.messageBox.configure(text=errorMsg, foreground="red")
+                elif self.type == "admin":
                     self.app.newUser = self.textStr
                     self.destroy()
-                else:
-                    errorMsg = "Error! Name already exists! Please change the name and hit 'submit' again."
-                    self.messageBox.configure(text=errorMsg, foreground="red")
-            elif self.type == "admin":
-                self.app.newUser = self.textStr
-                self.destroy()
 
         def cancel():
             self.destroy()
