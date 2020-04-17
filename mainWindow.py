@@ -4,11 +4,13 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+from simpleHash import passHash
 import fileManager
 import delUserWindow
 import keyboard
 import numPad
 import plotter
+#TODO: rest of the admin functionality (update password and prices)
 
 class MainWindow(tk.Frame):
 
@@ -36,6 +38,9 @@ class MainWindow(tk.Frame):
         userFont = 24
         btnFont = 20
 
+        fileManager.checkConfig()
+        coffeePrice, milkPrice, admin, isDefault = fileManager.readConfig()
+
         container = ttk.Frame(root)
         canvas = tk.Canvas(container)
         scrollbar = ttk.Scrollbar(container, orient="vertical", command = canvas.yview)
@@ -61,7 +66,7 @@ class MainWindow(tk.Frame):
         barChartCanvas.get_tk_widget().place(height=500, width=500, anchor='se', relx=1.0, rely=0.8)
 
         def addName():
-            dialog = keyboard.KeyboardGUI(self, app)
+            dialog = keyboard.KeyboardGUI(self, app, "user")
             root.wait_window(dialog)
             if len(self.newUser) > 0:
                 updateList(self, self.newUser)
@@ -85,6 +90,13 @@ class MainWindow(tk.Frame):
             barChartCanvas = FigureCanvasTkAgg(plotFigure, master=root)
             barChartCanvas.draw()
             barChartCanvas.get_tk_widget().place(height=500, width=500, anchor='se', relx=1.0, rely=0.8)
+
+        def queryAdminPassword():
+            dialog = keyboard.KeyboardGUI(self, app, "admin")
+            root.wait_window(dialog)
+            if len(self.newUser) > 0:
+                isAdmin = (passHash(self.newUser) == admin)
+            print(isAdmin)
 
         def buyCoffee(name):
             balance = self.memberDict.get(name)
@@ -194,7 +206,11 @@ class MainWindow(tk.Frame):
 
         paymentBtn = tk.Button(root, text="Make Payment", command=addAmount)
         paymentBtn.configure(font=(stdFont, btnFont))
-        paymentBtn.place(height=stdHeight, width=stdWidth, anchor = "se", relx=0.98, rely=0.98)
+        paymentBtn.place(height=stdHeight, width=stdWidth+20, anchor = "sw", x=2*stdWidth+70, rely=0.98)
+
+        adminBtn = tk.Button(root, text="Admin", command=queryAdminPassword)
+        adminBtn.configure(font=(stdFont, btnFont))
+        adminBtn.place(height=stdHeight, width=stdWidth, anchor="se", relx=0.98, rely =0.98 )
 
         try:
             self.memberDict, self.milkDict = fileManager.openList()
@@ -203,6 +219,10 @@ class MainWindow(tk.Frame):
             tk.messagebox.showinfo("Warning", "Did not find list to read from")
             self.memberDict = {}
             self.milkDict= {}
+
+        if isDefault:
+            msg = "Welcome to the coffee list! You are currently using the default admin password 'coffeeTime!'. \nYou can change the password in the 'Admin' dialog."
+            tk.messagebox.showinfo("Info", msg)
 
         root.after(200, animate, 0)
         root.protocol("WM_DELETE_WINDOW", export)
