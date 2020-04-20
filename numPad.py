@@ -3,14 +3,18 @@ import tkinter.font as tkFont
 
 class NumPad(tk.Toplevel):
 
-    def __init__(self, parent, app):
+    def __init__(self, parent, app, type):
         tk.Toplevel.__init__(self, parent)
         self.app= app
+        self.type = type
         self.init_window()
 
     def init_window(self):
         self.title("NumPad")
-        self.geometry("800x600")
+        winWidth=800
+        if self.type == "admin":
+            winWidth= 480
+        self.geometry("{0}x600".format(winWidth))
         fontSize = 30
         self.textStr = ""
         self.user = ""
@@ -44,11 +48,15 @@ class NumPad(tk.Toplevel):
             display.configure(text="{0}".format(self.textStr))
 
         def submit():
-            if len(self.textStr)>0:
+            if len(self.textStr)>0 and self.type=="user":
                 value = float(self.textStr)
                 value =int(value*100)
                 self.app.newVal=value
                 self.app.selectedUser=self.user
+            elif len(self.textStr)>0 and self.type=="admin":
+                value = float(self.textStr)
+                value = int(value*100)
+                self.app.newVal = value
             self.destroy()
 
         def makeNumPad(numPad):
@@ -93,8 +101,11 @@ class NumPad(tk.Toplevel):
             self.dropDownVar.trace('w', changeDropdown)
             dropDown.place(height=80, relwidth=0.95, x=5, y=60)
 
-
-        makeNumPad(numPad)
-        makeUserPane()
-        userSelectFrame.place(relheight=1.0, relwidth=0.4, anchor="nw", x=0, y=0)
-        numPadFrame.place(relheight=1.0, relwidth=0.6, anchor="ne", x=800, y=0)
+        if self.type == "user":
+            makeNumPad(numPad)
+            makeUserPane()
+            userSelectFrame.place(relheight=1.0, relwidth=0.4, anchor="nw", x=0, y=0)
+            numPadFrame.place(relheight=1.0, relwidth=0.6, anchor="ne", x=800, y=0)
+        elif self.type == "admin":
+            makeNumPad(numPad)
+            numPadFrame.place(relheight=1.0, relwidth=1.0, anchor='nw', x=0, y=0)

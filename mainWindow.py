@@ -5,6 +5,7 @@ from PIL import ImageTk, Image
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from simpleHash import passHash
+from adminWindow import AdminWindow
 import fileManager
 import delUserWindow
 import keyboard
@@ -20,6 +21,7 @@ class MainWindow(tk.Frame):
         self.master=master
         self.newVal = None
         self.newUser = ""
+        self.adminPass = ""
         self.selectedUser=""
         self.memberDict={}
         self.milkDict={}
@@ -74,7 +76,7 @@ class MainWindow(tk.Frame):
             fileManager.backup(self.memberDict, self.milkDict)
 
         def addAmount():
-            dialog = numPad.NumPad(self, app)
+            dialog = numPad.NumPad(self, app, "user")
             root.wait_window(dialog)
             if self.newVal != None:
                 updateLabel(self, self.newVal, self.selectedUser)
@@ -94,16 +96,19 @@ class MainWindow(tk.Frame):
         def queryAdminPassword():
             dialog = keyboard.KeyboardGUI(self, app, "admin")
             root.wait_window(dialog)
-            if len(self.newUser) > 0:
-                isAdmin = (passHash(self.newUser) == admin)
-            self.newUser = ""
-            print(isAdmin)
+            if len(self.adminPass) > 0:
+                isAdmin = (passHash(self.adminPass) == admin)
+            self.adminPass = ""
+            #isAdmin=True for testing
+            if isAdmin:
+                dialog = AdminWindow(self, app, coffeePrice, milkPrice)
+                root.wait_window(dialog)
 
         def buyCoffee(name):
             balance = self.memberDict.get(name)
             milk = self.milkDict.get(name)
             if balance != None:
-                balance=balance-20-5*milk
+                balance=balance-coffeePrice-milkPrice*milk
                 self.memberDict[name]=balance
                 getattr(self, 'balance_{0}'.format(name)).configure(text='{:.2f}'.format(balance/100))
             self.backupCounter = (self.backupCounter +1)%15

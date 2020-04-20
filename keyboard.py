@@ -90,7 +90,7 @@ class KeyboardGUI(tk.Toplevel):
                         errorMsg = "Error! Name already exists! Please change the name and hit 'submit' again."
                         self.messageBox.configure(text=errorMsg, foreground="red")
                 elif self.type == "admin":
-                    self.app.newUser = self.textStr
+                    self.app.adminPass = self.textStr
                     self.destroy()
 
         def cancel():
@@ -141,7 +141,7 @@ class KeyboardGUI(tk.Toplevel):
                 messageBoxHeight = 2*stdHeight
                 messageBoxWidth = 600
                 messageBoxAspect = int(messageBoxWidth/messageBoxHeight*100)
-                msgBoxDefault = "Welcome, Admin! Please enter your password\nClick on the checkbox over the numpad if you want the display in plain text"
+                msgBoxDefault = "Welcome, Admin! \nClick on the checkbox over the numpad if you want the display in plain text"
                 self.messageBox = tk.Message(self, text=msgBoxDefault, aspect=messageBoxAspect, font=(fontName, 20))
                 self.messageBox.place(height=messageBoxHeight, width=messageBoxWidth, x=300, y=yOffset)
 
