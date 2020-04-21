@@ -1,10 +1,25 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
+########################################################
+# Creates a clickable numberpad.
+#
+# The 'user' numberpad is meant to allow users to record the payments they make. If the
+# type is 'user', then a userPane with a drop down option menu listing the users is
+# also created.
+#
+# The 'admin' keyboard is intended to be used to change the prices for coffee and milk.
+# It does not include the userPane
+#
+# The numpad does not directly return a variable. Instead, it sets a property of the
+# parent widget.
+########################################################
+
 class NumPad(tk.Toplevel):
 
     def __init__(self, parent, app, type):
         tk.Toplevel.__init__(self, parent)
+        self.parent= parent
         self.app= app
         self.type = type
         self.init_window()
@@ -56,7 +71,7 @@ class NumPad(tk.Toplevel):
             elif len(self.textStr)>0 and self.type=="admin":
                 value = float(self.textStr)
                 value = int(value*100)
-                self.app.newVal = value
+                self.parent.newVal = value
             self.destroy()
 
         def makeNumPad(numPad):

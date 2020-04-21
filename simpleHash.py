@@ -1,5 +1,11 @@
 import string
 
+########################################################
+#
+# A simple hash so the admin password doesn't have to be stored in plain text
+#
+########################################################
+
 def initDict():
     chars = list(string.ascii_letters)+list(string.digits)+list(string.punctuation)
     start = 11

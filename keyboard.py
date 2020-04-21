@@ -2,6 +2,23 @@ import tkinter as tk
 from tkinter import PhotoImage
 from PIL import Image, ImageTk
 
+########################################################
+# Creates a clickable keyboard.
+# The last row of the keyboard and a second pad (either a numberpad or an accent pad)
+# depends on the 'type' = either user or admin. 
+#
+# The 'user' keyboard is intended to be used to add new users to the coffee list, so
+# it also checks that the given string is not already in the dictionary of users.
+#
+# The 'admin' keyboard is intended to be used to enter the admin password, or to set a
+# new admin password. By default, it displays the entered text as a string of asterix
+# instead of the plain text.
+#
+# Additional information for the user is given in a message box.
+#
+# The keyboard does not directly return a variable. Instead, it sets a property of the
+# parent widget.
+########################################################
 
 class KeyboardGUI(tk.Toplevel):
 

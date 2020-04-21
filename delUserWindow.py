@@ -1,6 +1,14 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
+########################################################
+#
+# The window for selecting a user for deletion
+# User is selected from a drop-down menu
+#
+# deletion is actually done in mainWindow
+########################################################
+
 class DelUserWindow(tk.Toplevel):
 
     def __init__(self, parent, app):

@@ -11,7 +11,7 @@ import delUserWindow
 import keyboard
 import numPad
 import plotter
-#TODO: rest of the admin functionality (update password and prices)
+#TODO: adjust for full screen width, add possibility for usb media backup
 
 class MainWindow(tk.Frame):
 
@@ -41,7 +41,13 @@ class MainWindow(tk.Frame):
         btnFont = 20
 
         fileManager.checkConfig()
-        coffeePrice, milkPrice, admin, isDefault = fileManager.readConfig()
+        self.coffeePrice, self.milkPrice, self.adminHash, isDefault = fileManager.readConfig()
+        if isinstance(self.coffeePrice, str):
+            self.coffeePrice = int(self.coffeePrice)
+        if isinstance(self.milkPrice, str):
+            self.milkPrice = int(self.milkPrice)
+        if isinstance(self.adminHash, str):
+            self.adminHash = int(self.adminHash)
 
         container = ttk.Frame(root)
         canvas = tk.Canvas(container)
@@ -93,22 +99,31 @@ class MainWindow(tk.Frame):
             barChartCanvas.draw()
             barChartCanvas.get_tk_widget().place(height=500, width=500, anchor='se', relx=1.0, rely=0.8)
 
-        def queryAdminPassword():
+        def openAdminWindow():
+            isAdmin = checkAdminPassword()
+            #isAdmin=True #for testing
+            if isAdmin:
+                dialog = AdminWindow(self, app)
+                root.wait_window(dialog)
+                if self.adminPass != "":
+                    self.adminHash = passHash(self.adminPass)
+                    self.adminPass =""
+                fileManager.updateConfig(coffeePrice = self.coffeePrice, milkPrice=self.milkPrice, adminPass=self.adminHash)
+            else:
+                tk.messagebox.showinfo("Info", "Incorrect password")
+
+        def checkAdminPassword():
             dialog = keyboard.KeyboardGUI(self, app, "admin")
             root.wait_window(dialog)
-            if len(self.adminPass) > 0:
-                isAdmin = (passHash(self.adminPass) == admin)
+            isAdmin = (passHash(self.adminPass) == self.adminHash)
             self.adminPass = ""
-            #isAdmin=True for testing
-            if isAdmin:
-                dialog = AdminWindow(self, app, coffeePrice, milkPrice)
-                root.wait_window(dialog)
+            return isAdmin
 
         def buyCoffee(name):
             balance = self.memberDict.get(name)
             milk = self.milkDict.get(name)
             if balance != None:
-                balance=balance-coffeePrice-milkPrice*milk
+                balance=balance-self.coffeePrice-self.milkPrice*milk
                 self.memberDict[name]=balance
                 getattr(self, 'balance_{0}'.format(name)).configure(text='{:.2f}'.format(balance/100))
             self.backupCounter = (self.backupCounter +1)%15
@@ -214,7 +229,7 @@ class MainWindow(tk.Frame):
         paymentBtn.configure(font=(stdFont, btnFont))
         paymentBtn.place(height=stdHeight, width=stdWidth+20, anchor = "sw", x=2*stdWidth+70, rely=0.98)
 
-        adminBtn = tk.Button(root, text="Admin", command=queryAdminPassword)
+        adminBtn = tk.Button(root, text="Admin...", command=openAdminWindow)
         adminBtn.configure(font=(stdFont, btnFont))
         adminBtn.place(height=stdHeight, width=stdWidth, anchor="se", relx=0.98, rely =0.98 )
 

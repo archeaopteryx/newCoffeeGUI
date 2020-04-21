@@ -4,12 +4,12 @@ from time import strftime, localtime
 from pathlib import Path
 from simpleHash import passHash
 
-#a 'with' statement basically incloses  a 'try... finally' block that closes the
-#file in the 'finally' statement. Therefore there's no need for an explicit close
-
-#If newline='' is not specified, newlines embedded inside quoted fields will not be interpreted correctly, and on platforms that use \r\n linendings on write an extra \r will be added. It should always be safe to specify newline='', since the csv module does its own (universal) newline handling.
-
-#writerow() expects a tuple or list of strings. If it only receives a string, it will interpret that string as a list of strings and print each character separated by a comma
+########################################################
+# Takes care of creating, reading and updating the config file
+#
+# Takes care of creating, reading and writing the memberList file and its
+# backup
+########################################################
 
 readInName = 'memberList.csv'
 backUpName = 'memberListBackup.csv'
@@ -37,9 +37,9 @@ def initConfig(os, configFile):
     configFile.touch()
     with open(configFile, 'w', newline='') as f:
         fwriter = csv.writer(f,delimiter=",")
-        fwriter.writerow(("CoffeePrice: ", defaultCoffee))
-        fwriter.writerow(("MilkPrice: ", defaultMilk))
-        fwriter.writerow(("Admin: ", defaultAdmin))
+        fwriter.writerow(("CoffeePrice:", defaultCoffee))
+        fwriter.writerow(("MilkPrice:", defaultMilk))
+        fwriter.writerow(("Admin:", defaultAdmin))
 
 def getConfigFile():
     os = sys.platform
@@ -59,29 +59,34 @@ def readConfig():
         fileReader = csv.reader(f, delimiter=",")
         for row in fileReader:
             if len(row) == 2:
-                valueDict[row[0]] = int(row[1])
+                valueDict[row[0]] = row[1]
     coffeePrice = valueDict.get("CoffeePrice:") or defaultCoffee
     milkPrice = valueDict.get("MilkPrice:") or defaultMilk
     admin = valueDict.get("Admin:") or defaultAdmin
-    if admin != defaultAdmin:
-        isDefault = False
+    if isinstance(admin, str):
+        admin = int(admin)
+    isDefault = admin == defaultAdmin
     return (coffeePrice, milkPrice, admin, isDefault)
 
-def updateConfig(key, value):
+def updateConfig(**newValues):
     valueDict={}
     configFile = getConfigFile()
     with open(configFile, newline='') as f:
         fileReader = csv.reader(f, delimiter=",")
         for row in fileReader:
             if len(row) == 2:
-                valueDict[row[0]] = int(row[1])
-    if valueDict.get(key) != None:
-        valueDict[key] = value
+                valueDict[row[0]] = row[1]
+    if newValues.get("coffeePrice") != None:
+        valueDict["CoffeePrice:"] = newValues["coffeePrice"]
+    if newValues.get("milkPrice") != None:
+        valueDict["MilkPrice:"] = newValues["milkPrice"]
+    if newValues.get("adminPass") != None:
+        valueDict["Admin:"] = newValues["adminPass"]
     with open(configFile, 'w', newline='') as f:
         fwriter = csv.writer(f,delimiter=",")
-        fwriter.writerow(("CoffeePrice: ", valueDict.get("CoffeePrice:")))
-        fwriter.writerow(("MilkPrice: ", valueDict.get("MilkPrice:")))
-        fwriter.writerow(("Admin: ", valueDict.get("Admin:")))
+        fwriter.writerow(("CoffeePrice:", valueDict.get("CoffeePrice:")))
+        fwriter.writerow(("MilkPrice:", valueDict.get("MilkPrice:")))
+        fwriter.writerow(("Admin:", valueDict.get("Admin:")))
 
 def openList():
     skipRows = 2
