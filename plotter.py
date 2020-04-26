@@ -8,6 +8,17 @@ from matplotlib.ticker import MaxNLocator
 #import tkinter as tk
 #import sys
 
+########################################################
+# Initalizes the coffees plot and updates its values
+#
+# If the day has changed, then the Plotter re-initializes itself with None values.
+# The hours displayed on the x axis are determined by the time when the first
+# coffee of the day is purchased
+#
+# If the day has not changed, then the hour is checked and the number of coffees
+# for that hour is incremented
+########################################################
+
 class Plotter():
 
     def __init__(self):
@@ -27,7 +38,6 @@ class Plotter():
         self.hours=np.array(np.arange(self.firstHour, 24), dtype=int)
 
     def update_values(self):
-        self.coffees
         today = int(strftime('%j', localtime()))
         if today == self.day:
             hour = int(strftime('%H', localtime()))

@@ -11,13 +11,18 @@ import delUserWindow
 import keyboard
 import numPad
 import plotter
-#TODO: adjust for full screen width, add possibility for usb media backup
+#TODO: add possibility for usb media backup
+
+########################################################
+# Layout and functions for the main window
+#
+# Coordinates calls to the other modules
+########################################################
 
 class MainWindow(tk.Frame):
 
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
-        screenHeight = master.winfo_screenheight()
         self.master=master
         self.newVal = None
         self.newUser = ""
@@ -26,14 +31,16 @@ class MainWindow(tk.Frame):
         self.memberDict={}
         self.milkDict={}
         self.backupCounter = 0
-        self.plotFigure = Figure(figsize=(5,5))
 
-        self.init_window(screenHeight)
+        self.init_window()
 
-    def init_window(self, screenHeight):
+    def init_window(self):
         self.master.title("Main Window")
-        self.master.geometry("1500x{0}".format(screenHeight))
+        screenWidth = self.master.winfo_screenwidth()
+        screenHeight = self.master.winfo_screenheight()
+        self.master.geometry("{0}x{1}".format(screenWidth, screenHeight))
 
+        canvasWidth = 900
         stdHeight = 60
         stdWidth = 200
         stdFont = "TkDefaultFont"
@@ -48,30 +55,6 @@ class MainWindow(tk.Frame):
             self.milkPrice = int(self.milkPrice)
         if isinstance(self.adminHash, str):
             self.adminHash = int(self.adminHash)
-
-        container = ttk.Frame(root)
-        canvas = tk.Canvas(container)
-        scrollbar = ttk.Scrollbar(container, orient="vertical", command = canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
-        scrollable_frame.bind(
-        "<Configure>",
-         lambda e: canvas.configure(
-         scrollregion=canvas.bbox("all")))
-
-        canvas.create_window((0,0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        animationFrames = [tk.PhotoImage(file='coffeeAnimation2.gif', format='gif -index {0}'.format(i)) for i in range(4)]
-        animationLabel = tk.Label(root)
-        animationLabel.place(height=250, width=200, anchor='ne', relx=1.0, rely=0)
-
-        plotterObject = plotter.Plotter()
-        coffees = plotterObject.coffees
-        hours = plotterObject.hours
-        plotFigure = plotter.makePlot(coffees, hours)
-        barChartCanvas = FigureCanvasTkAgg(plotFigure, master=root)
-        barChartCanvas.draw()
-        barChartCanvas.get_tk_widget().place(height=500, width=500, anchor='se', relx=1.0, rely=0.8)
 
         def addName():
             dialog = keyboard.KeyboardGUI(self, app, "user")
@@ -97,7 +80,41 @@ class MainWindow(tk.Frame):
             plotFigure = plotter.makePlot(coffees, hours)
             barChartCanvas = FigureCanvasTkAgg(plotFigure, master=root)
             barChartCanvas.draw()
-            barChartCanvas.get_tk_widget().place(height=500, width=500, anchor='se', relx=1.0, rely=0.8)
+            barChartCanvas.get_tk_widget().place(height=figHeightPx, width=figWidthPx, anchor='se', relx=1.0, rely=0.8)
+
+        def getFigWidth():
+            figWidthPx = round((screenWidth-canvasWidth)*0.8, 0)
+            mmPerPx = self.master.winfo_screenmmwidth()/screenWidth
+            inPer_mm = 0.039
+            figWidthInches = round(figWidthPx*mmPerPx*inPer_mm, 1)
+            return figWidthInches
+
+        def getCanvasX():
+            return round((screenWidth-canvasWidth)*0.1, 0)
+
+        def initScrollableCanvas():
+            container = ttk.Frame(root)
+            canvas = tk.Canvas(container)
+            scrollbar = ttk.Scrollbar(container, orient="vertical", command = canvas.yview)
+            scrollable_frame = ttk.Frame(canvas)
+            scrollable_frame.bind(
+            "<Configure>",
+             lambda e: canvas.configure(
+             scrollregion=canvas.bbox("all")))
+
+            canvas.create_window((0,0), window=scrollable_frame, anchor="nw")
+            canvas.configure(yscrollcommand=scrollbar.set)
+            canvas.pack(side="left",fill="both", expand="True")
+            scrollbar.pack(side="right", fill="y")
+            upperCorner = getCanvasX()
+            container.place(relheight=0.85, width=canvasWidth, anchor="nw", x=upperCorner, y=10)
+            return canvas, scrollable_frame, scrollbar
+
+        def initAnimation():
+            animationFrames = [tk.PhotoImage(file='coffeeAnimation2.gif', format='gif -index {0}'.format(i)) for i in range(4)]
+            animationLabel = tk.Label(root)
+            animationLabel.place(height=250, width=200, anchor='ne', relx=1.0, rely=0)
+            return animationFrames, animationLabel
 
         def openAdminWindow():
             isAdmin = checkAdminPassword()
@@ -213,9 +230,22 @@ class MainWindow(tk.Frame):
             fileManager.export(self.memberDict, self.milkDict)
             root.destroy()
 
-        canvas.pack(side="left",fill="both", expand="True")
-        scrollbar.pack(side="right", fill="y")
-        container.place(relheight=0.85, width=900, anchor="nw", x=10, y=10)
+        figWidth = getFigWidth()
+        figHeight = round(figWidth/1.6, 1)
+        self.plotFigure = Figure(figsize=(figWidth,figHeight))
+        plotterObject = plotter.Plotter()
+        coffees = plotterObject.coffees
+        hours = plotterObject.hours
+        plotFigure = plotter.makePlot(coffees, hours)
+        barChartCanvas = FigureCanvasTkAgg(plotFigure, master=root)
+        barChartCanvas.draw()
+        figWidthPx = round((screenWidth-canvasWidth)*0.8, 1)
+        figHeightPx = round((figWidthPx/1.6), 1)
+        barChartCanvas.get_tk_widget().place(height=figHeightPx, width=figWidthPx, anchor='se', relx=1.0, rely=0.8)
+
+
+        canvas, scrollable_frame, scrollbar = initScrollableCanvas()
+        animationFrames, animationLabel = initAnimation()
 
         nameBtn = tk.Button(root, text="Add User", command=addName)
         nameBtn.configure(font=(stdFont, btnFont))
