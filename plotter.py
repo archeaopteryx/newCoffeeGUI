@@ -45,8 +45,8 @@ class Plotter():
             self.coffees[hourIndex]+=1
             return(self.coffees, self.hours)
         else:
-            init_values()
-            update_values()
+            self.init_values()
+            self.update_values()
 
 
     #def close():
