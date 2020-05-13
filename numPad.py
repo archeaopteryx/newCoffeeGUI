@@ -38,13 +38,14 @@ class NumPad(tk.Toplevel):
         userSelectFrame = tk.Frame(self)
         stdKeyWidth = 3
 
-        row1 = ['7','8','9']
-        row2 = ['4','5','6']
-        row3 = ['1','2','3']
-        row4 = ['-','0','.']
-        row5= ['del','C', 'SUBMIT']
-
-        numPad = [row1, row2, row3, row4, row5]
+        numPad = [
+            ['7','8','9'],
+            ['4','5','6'],
+            ['1','2','3'],
+            ['-','0','.'],
+            ['del','C', 'SUBMIT']
+        ]
+        
         display = tk.Label(numPadFrame, text="", font=("TkDefaultFont", fontSize))
         rowHeight=0.16
         colWidth= 0.33

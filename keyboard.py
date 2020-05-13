@@ -78,7 +78,7 @@ class KeyboardGUI(tk.Toplevel):
 
         def nextChar(character):
             toDisplay = str(character)+self.accent
-            self.textStr += character
+            self.textStr += toDisplay
             self.starredStr+="*"
             updateDisplay()
             if len(self.textStr) == 1:

@@ -132,7 +132,7 @@ def export(memberDict, milkDict):
     readInFile = Path(readInName)
 
     if not backupFile.is_file() and readInFile.is_file():
-        readInFile.rename(backUpNamep)
+        readInFile.rename(backUpName)
         writeToFile(readInName, memberDict, milkDict)
     else:
         writeToFile(readInName, memberDict, milkDict)
