@@ -4,13 +4,14 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-from simpleHash import passHash
-from adminWindow import AdminWindow
-import fileManager
-import delUserWindow
-import keyboard
-import numPad
-import plotter
+from pathlib import PurePath
+from src.simpleHash import passHash
+from src.adminWindow import AdminWindow
+import src.fileManager as fileManager
+import src.delUserWindow as delUserWindow
+import src.keyboard as keyboard
+import src.numPad as numPad
+import src.plotter as plotter
 #TODO: add possibility for usb media backup
 
 ########################################################
@@ -23,7 +24,7 @@ class MainWindow(tk.Frame):
 
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
-        self.master=master
+        self.master = master
         self.newVal = None
         self.newUser = ""
         self.adminPass = ""
@@ -57,16 +58,16 @@ class MainWindow(tk.Frame):
             self.adminHash = int(self.adminHash)
 
         def addName():
-            dialog = keyboard.KeyboardGUI(self, app, "user")
-            root.wait_window(dialog)
+            dialog = keyboard.KeyboardGUI(self, "user")
+            self.master.wait_window(dialog)
             if len(self.newUser) > 0:
                 updateList(self, self.newUser)
             self.newUser = ""
             fileManager.backup(self.memberDict, self.milkDict)
 
         def addAmount():
-            dialog = numPad.NumPad(self, app, "user")
-            root.wait_window(dialog)
+            dialog = numPad.NumPad(self, "user")
+            self.master.wait_window(dialog)
             if self.newVal != None:
                 updateLabel(self, self.newVal, self.selectedUser)
             self.newVal=None
@@ -78,7 +79,7 @@ class MainWindow(tk.Frame):
             coffees = plotterObject.coffees
             hours = plotterObject.hours
             plotFigure = plotter.makePlot(coffees, hours)
-            barChartCanvas = FigureCanvasTkAgg(plotFigure, master=root)
+            barChartCanvas = FigureCanvasTkAgg(plotFigure, master=self.master)
             barChartCanvas.draw()
             barChartCanvas.get_tk_widget().place(height=figHeightPx, width=figWidthPx, anchor='se', relx=1.0, rely=0.8)
 
@@ -93,7 +94,7 @@ class MainWindow(tk.Frame):
             return round((screenWidth-canvasWidth)*0.1, 0)
 
         def initScrollableCanvas():
-            container = ttk.Frame(root)
+            container = ttk.Frame(self.master)
             canvas = tk.Canvas(container)
             scrollbar = ttk.Scrollbar(container, orient="vertical", command = canvas.yview)
             scrollable_frame = ttk.Frame(canvas)
@@ -111,8 +112,9 @@ class MainWindow(tk.Frame):
             return canvas, scrollable_frame, scrollbar
 
         def initAnimation():
-            animationFrames = [tk.PhotoImage(file='coffeeAnimation2.gif', format='gif -index {0}'.format(i)) for i in range(4)]
-            animationLabel = tk.Label(root)
+            imgPath = PurePath("." , "src" , "images" , "coffeeAnimation2.gif")
+            animationFrames = [tk.PhotoImage(file=imgPath, format='gif -index {0}'.format(i)) for i in range(4)]
+            animationLabel = tk.Label(self.master)
             animationLabel.place(height=250, width=200, anchor='ne', relx=1.0, rely=0)
             return animationFrames, animationLabel
 
@@ -120,8 +122,8 @@ class MainWindow(tk.Frame):
             isAdmin = checkAdminPassword()
             #isAdmin=True #for testing
             if isAdmin:
-                dialog = AdminWindow(self, app)
-                root.wait_window(dialog)
+                dialog = AdminWindow(self)
+                self.master.wait_window(dialog)
                 if self.adminPass != "":
                     self.adminHash = passHash(self.adminPass)
                     self.adminPass =""
@@ -130,8 +132,8 @@ class MainWindow(tk.Frame):
                 tk.messagebox.showinfo("Info", "Incorrect password")
 
         def checkAdminPassword():
-            dialog = keyboard.KeyboardGUI(self, app, "admin")
-            root.wait_window(dialog)
+            dialog = keyboard.KeyboardGUI(self, "admin")
+            self.master.wait_window(dialog)
             isAdmin = (passHash(self.adminPass) == self.adminHash)
             self.adminPass = ""
             return isAdmin
@@ -154,26 +156,26 @@ class MainWindow(tk.Frame):
             self.milkDict[name]=newVal
 
         def makeNameLabel(name):
-            nameLabel=tk.Label(root, text="")
+            nameLabel=tk.Label(self.master, text="")
             nameLabel.configure(text="{0}".format(name), font=(stdFont, userFont))
             return nameLabel
 
         def makeBalanceLabel(name):
-            balanceLabel = tk.Label(root, text="")
+            balanceLabel = tk.Label(self.master, text="")
             balanceLabel.configure(text='{:.2f}'.format(self.memberDict[name]/100))
             balanceLabel.configure(font=(stdFont, userFont))
             setattr(self, 'balance_{0}'.format(name), balanceLabel)
             return balanceLabel
 
         def makeMilkCheck(name):
-            milkCheck = tk.Checkbutton(root, text="with milk", command=lambda milkName = name: updateMilk(milkName))
+            milkCheck = tk.Checkbutton(self.master, text="with milk", command=lambda milkName = name: updateMilk(milkName))
             if self.milkDict[name] == 1:
                 milkCheck.toggle()
             milkCheck.configure(font=(stdFont, btnFont))
             return milkCheck
 
         def makeBuyBtn(name):
-            buy_btn = tk.Button(root, text="Buy a coffee", command = lambda nameVal = name: buyCoffee(nameVal))
+            buy_btn = tk.Button(self.master, text="Buy a coffee", command = lambda nameVal = name: buyCoffee(nameVal))
             buy_btn.configure(font=(stdFont, btnFont))
             return buy_btn
 
@@ -213,8 +215,8 @@ class MainWindow(tk.Frame):
                 msg = "No users to remove!"
                 tk.messagebox.showinfo("Error!", msg)
             else:
-                dialog = delUserWindow.DelUserWindow(self, app)
-                root.wait_window(dialog)
+                dialog = delUserWindow.DelUserWindow(self)
+                self.master.wait_window(dialog)
                 if len(self.selectedUser) != 0:
                     del self.memberDict[self.selectedUser]
                     updateList(self, None)
@@ -224,11 +226,11 @@ class MainWindow(tk.Frame):
             index = index%4
             frame = animationFrames[index]
             animationLabel.configure(image=frame)
-            root.after(200, animate, index+1)
+            self.master.after(200, animate, index+1)
 
         def export():
             fileManager.export(self.memberDict, self.milkDict)
-            root.destroy()
+            self.master.destroy()
 
         figWidth = getFigWidth()
         figHeight = round(figWidth/1.6, 1)
@@ -237,7 +239,7 @@ class MainWindow(tk.Frame):
         coffees = plotterObject.coffees
         hours = plotterObject.hours
         plotFigure = plotter.makePlot(coffees, hours)
-        barChartCanvas = FigureCanvasTkAgg(plotFigure, master=root)
+        barChartCanvas = FigureCanvasTkAgg(plotFigure, master=self.master)
         barChartCanvas.draw()
         figWidthPx = round((screenWidth-canvasWidth)*0.8, 1)
         figHeightPx = round((figWidthPx/1.6), 1)
@@ -247,19 +249,19 @@ class MainWindow(tk.Frame):
         canvas, scrollable_frame, scrollbar = initScrollableCanvas()
         animationFrames, animationLabel = initAnimation()
 
-        nameBtn = tk.Button(root, text="Add User", command=addName)
+        nameBtn = tk.Button(self.master, text="Add User", command=addName)
         nameBtn.configure(font=(stdFont, btnFont))
         nameBtn.place(height=stdHeight, width=stdWidth, anchor="sw", x=10, rely=0.98)
 
-        removeBtn = tk.Button(root, text="Remove User", command=removeUser)
+        removeBtn = tk.Button(self.master, text="Remove User", command=removeUser)
         removeBtn.configure(font=(stdFont, btnFont))
         removeBtn.place(height=stdHeight, width=stdWidth, anchor="sw", x=stdWidth+40, rely=0.98)
 
-        paymentBtn = tk.Button(root, text="Make Payment", command=addAmount)
+        paymentBtn = tk.Button(self.master, text="Make Payment", command=addAmount)
         paymentBtn.configure(font=(stdFont, btnFont))
         paymentBtn.place(height=stdHeight, width=stdWidth+20, anchor = "sw", x=2*stdWidth+70, rely=0.98)
 
-        adminBtn = tk.Button(root, text="Admin...", command=openAdminWindow)
+        adminBtn = tk.Button(self.master, text="Admin...", command=openAdminWindow)
         adminBtn.configure(font=(stdFont, btnFont))
         adminBtn.place(height=stdHeight, width=stdWidth, anchor="se", relx=0.98, rely =0.98 )
 
@@ -275,11 +277,5 @@ class MainWindow(tk.Frame):
             msg = "Welcome to the coffee list! You are currently using the default admin password 'coffeeTime!'. \nYou can change the password in the 'Admin' dialog."
             tk.messagebox.showinfo("Info", msg)
 
-        root.after(200, animate, 0)
-        root.protocol("WM_DELETE_WINDOW", export)
-
-
-if __name__ == '__main__':
-    root = tk.Tk()
-    app = MainWindow(master=root)
-    root.mainloop()
+        self.master.after(200, animate, 0)
+        self.master.protocol("WM_DELETE_WINDOW", export)

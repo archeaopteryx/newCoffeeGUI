@@ -17,10 +17,9 @@ import tkinter.font as tkFont
 
 class NumPad(tk.Toplevel):
 
-    def __init__(self, parent, app, type):
+    def __init__(self, parent, type):
         tk.Toplevel.__init__(self, parent)
-        self.parent= parent
-        self.app= app
+        self.app= parent
         self.type = type
         self.init_window()
 
@@ -45,7 +44,7 @@ class NumPad(tk.Toplevel):
             ['-','0','.'],
             ['del','C', 'SUBMIT']
         ]
-        
+
         display = tk.Label(numPadFrame, text="", font=("TkDefaultFont", fontSize))
         rowHeight=0.16
         colWidth= 0.33
@@ -72,7 +71,7 @@ class NumPad(tk.Toplevel):
             elif len(self.textStr)>0 and self.type=="admin":
                 value = float(self.textStr)
                 value = int(value*100)
-                self.parent.newVal = value
+                self.app.newVal = value
             self.destroy()
 
         def makeNumPad(numPad):

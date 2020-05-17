@@ -1,11 +1,12 @@
 import tkinter as tk
 from tkinter import PhotoImage
+from pathlib import Path
 from PIL import Image, ImageTk
 
 ########################################################
 # Creates a clickable keyboard.
 # The last row of the keyboard and a second pad (either a numberpad or an accent pad)
-# depends on the 'type' = either user or admin. 
+# depends on the 'type' = either user or admin.
 #
 # The 'user' keyboard is intended to be used to add new users to the coffee list, so
 # it also checks that the given string is not already in the dictionary of users.
@@ -22,9 +23,9 @@ from PIL import Image, ImageTk
 
 class KeyboardGUI(tk.Toplevel):
 
-    def __init__(self,parent, app, type):
+    def __init__(self,parent, type):
         tk.Toplevel.__init__(self, parent)
-        self.app = app
+        self.app = parent
         self.type = type
         self.init_window()
 
@@ -218,7 +219,8 @@ class KeyboardGUI(tk.Toplevel):
                     button.configure(command=lambda accentVar = accentAdd: addAccent(accentVar))
                     button.place(height=stdHeight, width=stdWidth, x=xOffset, y=yOffset)
                     xOffset+= stdWidth
-            helpIcon = ImageTk.PhotoImage(Image.open('helpIcon.png').resize(size=(stdWidth-6, stdHeight-6)))
+            iconPath = Path(".", "src", "images", "helpIcon.png")
+            helpIcon = ImageTk.PhotoImage(Image.open(iconPath).resize(size=(stdWidth-6, stdHeight-6)))
             helpBtn = tk.Button(self, image=helpIcon, font=(fontName, 16))
             helpBtn.image=helpIcon
             helpBtn.configure(command=helpBox)

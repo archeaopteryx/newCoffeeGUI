@@ -2,7 +2,7 @@ import csv
 import sys
 from time import strftime, localtime
 from pathlib import Path
-from simpleHash import passHash
+from src.simpleHash import passHash
 
 ########################################################
 # Takes care of creating, reading and updating the config file

@@ -1,6 +1,6 @@
 import tkinter as tk
-from numPad import NumPad
-from keyboard import KeyboardGUI
+from src.numPad import NumPad
+from src.keyboard import KeyboardGUI
 
 ########################################################
 # Lays out the window for the administrative tasks and takes care of the associated
@@ -15,10 +15,9 @@ from keyboard import KeyboardGUI
 
 class AdminWindow(tk.Toplevel):
 
-    def __init__(self, parent, app):
+    def __init__(self, parent):
         tk.Toplevel.__init__(self, parent)
-        self.app = app
-        self.parent=parent
+        self.app = parent
         self.coffee = self.app.coffeePrice
         self.milk = self.app.milkPrice
         self.adminPass = ""
@@ -58,10 +57,10 @@ class AdminWindow(tk.Toplevel):
             self.wait_window(dialog)
 
         def submit():
-            self.parent.coffeePrice = self.coffee
-            self.parent.milkPrice = self.milk
+            self.app.coffeePrice = self.coffee
+            self.app.milkPrice = self.milk
             if len(self.adminPass)>0:
-                self.parent.adminPass = self.adminPass
+                self.app.adminPass = self.adminPass
             self.destroy()
 
         def cancel():

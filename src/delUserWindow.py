@@ -11,9 +11,9 @@ import tkinter.font as tkFont
 
 class DelUserWindow(tk.Toplevel):
 
-    def __init__(self, parent, app):
+    def __init__(self, parent):
         tk.Toplevel.__init__(self, parent)
-        self.app = app
+        self.app = parent
         self.init_window()
 
     def init_window(self):
